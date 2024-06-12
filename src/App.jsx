@@ -6,11 +6,12 @@ import { Routes,Route } from 'react-router-dom'
 
 const App = () => {
   const [sidebar,setSidebar] = useState(true);
+  const [query,setQuery] = useState(null);
   return (
     <div>
-      <Navbar setSidebar={setSidebar} />
+      <Navbar setSidebar={setSidebar} setQuery={setQuery} />
       <Routes>
-        <Route path="/" element={<Home sidebar={sidebar}/>} />
+        <Route path="/" element={<Home sidebar={sidebar} setQuery={setQuery} query={query}/>} />
         <Route path="/video/:categoryId/:videoId" element={<Video/>} />
       </Routes>
     </div>

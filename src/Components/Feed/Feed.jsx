@@ -13,35 +13,51 @@ import thumbnail8 from '../../assets/thumbnail8.png'
 import { API_KEY, value_converter } from '../../data'
 import moment from 'moment'
 
-const Feed = ({category}) => {
+const Feed = ({category,query}) => {
 
     const [data,setData] = useState([]);
 
-    const fetchData = async()=>{
+    const fetchCategoryData = async()=>{
         const videoListUrl = `https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&chart=mostPopular&maxResults=50&regionCode=US&videoCategoryId=${category}&key=${API_KEY}`;
 
         await fetch(videoListUrl).then(response=>response.json()).then(data=>setData(data.items))
     }
+    const fetchQueryData = async()=>{
+        const searchByKeywordUrl = `https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&q=${query}&key=${API_KEY}`;
+        await fetch(searchByKeywordUrl).then(response=>response.json()).then(data=>setData(data.items))
+    }
 
     useEffect(()=>{
-        fetchData();
+        fetchCategoryData();
     },[category])
+
+    useEffect(()=>{
+        fetchQueryData();
+    },[query])
 
   return (
     <div className="feed">
     {
-        data.map((item,index)=>{
+        data.map((item, index) => {
             return (
                 <Link to={`video/${item.snippet.categoryId}/${item.id}`} className='card' key={`item-${index}`}>
-                <img src={item.snippet.thumbnails.medium.url} alt=''/>
-                <h2>{item.snippet.title} </h2>
-                <h3>{item.snippet.channelTitle}</h3>
-                <p>{value_converter(item.statistics.viewCount)} Views &bull;{moment(item.snippet.publishedAt).fromNow()} </p>
-            </Link>
-        )
-    })}
-        
-    </div>
+                    {item.snippet.thumbnails?.medium?.url ? (
+                        <img src={item.snippet.thumbnails.medium.url} alt=''/>
+                    ) : (
+                        <img src="default-thumbnail.jpg" alt=''/>
+                    )}
+                    <h2>{item.snippet.title} </h2>
+                    <h3>{item.snippet.channelTitle}</h3>
+                    <p>{item.statistics?.viewCount ? (
+                        `${value_converter(item.statistics.viewCount)} Views`
+                    ) : (
+                        'No views data'
+                    )} &bull; {moment(item.snippet.publishedAt).fromNow()} </p>
+                </Link>
+            )
+        })
+    }
+</div>
   )
 }
 
